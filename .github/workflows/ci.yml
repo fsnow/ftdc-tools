@@ -1,0 +1,125 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-python:
+    name: Test Python Library
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install uv
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+    - name: Install dependencies
+      working-directory: ./python
+      run: |
+        uv pip install --system -e .
+        uv pip install --system pytest pytest-cov
+
+    - name: Run tests
+      working-directory: ./python
+      run: |
+        pytest ../tests -v --cov=ftdc --cov-report=xml --cov-report=term
+
+    - name: Upload coverage
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./python/coverage.xml
+        flags: python-${{ matrix.python-version }}
+
+  build-go:
+    name: Build Go CLI
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: ["1.21", "1.22"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go ${{ matrix.go-version }}
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ matrix.go-version }}
+
+    - name: Build CLI
+      working-directory: ./go
+      run: |
+        go mod download
+        go build -v -o bin/ftdc-cli ./cmd/ftdc-cli
+
+    - name: Test CLI
+      working-directory: ./go
+      run: |
+        ./bin/ftdc-cli --version
+        ./bin/ftdc-cli --help
+
+    - name: Upload artifact
+      if: matrix.go-version == '1.22'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ftdc-cli-linux-amd64
+        path: go/bin/ftdc-cli
+
+  lint-go:
+    name: Lint Go Code
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: "1.22"
+
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v6
+      with:
+        version: latest
+        working-directory: go
+
+  lint-python:
+    name: Lint Python Code
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install uv
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+    - name: Install dependencies
+      working-directory: ./python
+      run: |
+        uv pip install --system -e .
+        uv pip install --system ruff
+
+    - name: Run ruff
+      working-directory: ./python
+      run: |
+        ruff check ftdc/
