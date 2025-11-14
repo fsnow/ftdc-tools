@@ -7,15 +7,14 @@ MongoDB FTDC (Full Time Diagnostic Data Capture) parsing and analysis tools.
 **NOT PRODUCTION READY**
 
 Current limitations:
-- 🔴 **Python parser has critical bugs** - fails on some valid FTDC files
-- 🔴 **Limited test coverage** - only tested with one Atlas FTDC file (version/platform unknown)
-- ⚠️ **No multi-version testing** - MongoDB 7.0, 8.0, 8.2 not verified
+- 🔴 **Limited test coverage** - only tested with one Atlas FTDC file (MongoDB 8.0.16)
+- ⚠️ **No multi-version testing** - MongoDB 7.0, 8.2 not verified
 - ⚠️ **No platform verification** - Linux x86_64, ARM64, macOS, Windows not tested
 
 **What works**:
 - ✅ Go CLI - Stable wrapper around official mongodb/ftdc library
-- ✅ Python parser - Basic functionality on limited test data
-- ✅ 124 passing unit tests
+- ✅ Python parser - Double precision bug fixed (matches mongodb/ftdc behavior)
+- ✅ 122 passing unit tests
 
 **Before using in production**: See [KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md) and [TESTING_COVERAGE.md](docs/TESTING_COVERAGE.md)
 

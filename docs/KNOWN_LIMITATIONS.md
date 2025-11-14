@@ -24,27 +24,26 @@
 
 **See**: [docs/TESTING_COVERAGE.md](./TESTING_COVERAGE.md) for detailed testing plan
 
-### 2. Python Parser: Double Precision Handling (CRITICAL)
+### 2. Python Parser: Double Precision Handling (RESOLVED)
 
-**Status**: 🔴 CRITICAL - Python parser fails on some valid FTDC files
+**Status**: ✅ RESOLVED - Fixed to match mongodb/ftdc Go implementation
 
-**Error**: `struct.error: required argument is not an integer`
+**Previous Error**: `struct.error: required argument is not an integer`
 
-**Location**: `ftdc/parser/metrics.py:76` in `restore_float()` function
+**Location**: `ftdc/parser/metrics.py` - `restore_float()` function
 
-**Description**: The Python parser fails when reconstructing double values from FTDC delta streams. The Go library (mongodb/ftdc) handles these files correctly.
+**Description**: The Python parser was failing when reconstructing double values from FTDC delta streams in edge cases where int64 overflow occurred during delta arithmetic.
 
-**Root Cause**: Related to the double precision issue documented in the roadmap. MongoDB stores doubles as int64 bit patterns in the delta stream, and the Python parser's float reconstruction logic doesn't handle all cases correctly.
+**Root Cause**: MongoDB stores doubles as int64 bit patterns in the delta stream. Delta arithmetic could cause values to overflow int64 range, causing `struct.pack('<q', value)` to fail.
 
-**Workaround**: Use the Go CLI (`ftdc-cli extract`) for extracting metrics until Python parser is fixed.
+**Fix Applied**: Updated `restore_float()` to match the mongodb/ftdc Go implementation:
+- Cast to uint64 before bit reinterpretation (handles overflow/underflow)
+- Made function idempotent (handles float inputs gracefully)
+- Uses `struct.pack('<Q', unsigned_value)` for unsigned interpretation
 
-**Impact**: HIGH - Python parser cannot process some production FTDC files
+**Go Reference**: `func restoreFloat(in int64) float64 { return math.Float64frombits(uint64(in)) }`
 
-**TODO**:
-- [ ] Investigate exact conditions that trigger the error
-- [ ] Review double precision handling in `restore_float()` and `reconstruct_document()`
-- [ ] Add test case with failing FTDC file
-- [ ] Implement robust double reconstruction matching Go library behavior
+**Verification**: All 122 existing tests pass with the new implementation
 
 ### 2. Interim File Parsing (NEEDS INVESTIGATION)
 

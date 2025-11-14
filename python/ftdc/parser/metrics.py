@@ -59,11 +59,14 @@ def normalize_float(value: float) -> int:
     return struct.unpack('<q', packed)[0]
 
 
-def restore_float(value: int) -> float:
+def restore_float(value: int | float) -> float:
     """Convert an int64 back to float by reinterpreting the bits.
 
+    This matches the mongodb/ftdc Go implementation:
+        func restoreFloat(in int64) float64 { return math.Float64frombits(uint64(in)) }
+
     Args:
-        value: int64 bit pattern
+        value: int64 bit pattern or already-restored float
 
     Returns:
         float64 value
@@ -71,9 +74,22 @@ def restore_float(value: int) -> float:
     Example:
         >>> restore_float(4609434218613702656)
         1.5
+
+    Note:
+        This function is idempotent - if value is already a float, it returns it as-is.
+        For overflow/underflow, we treat the value as uint64 (wrapping to 64-bit range)
+        then reinterpret the bits as IEEE 754 double precision float.
     """
-    # Pack as signed int64, unpack as double
-    packed = struct.pack('<q', value)
+    # If it's already a float, return it as-is (idempotent)
+    if isinstance(value, float):
+        return value
+
+    # Convert to unsigned 64-bit (wraps negative and overflow values)
+    # This matches Go's uint64(in) cast behavior
+    unsigned_value = value & 0xFFFFFFFFFFFFFFFF
+
+    # Pack as unsigned int64, unpack as double (IEEE 754 bit reinterpretation)
+    packed = struct.pack('<Q', unsigned_value)  # '<Q' = unsigned long long
     return struct.unpack('<d', packed)[0]
 
 

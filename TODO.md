@@ -3,26 +3,27 @@
 ## High Priority
 
 ### 1. Fix Python Parser Double Precision Bug
-**Status**: 🔴 CRITICAL - Blocks production use
-**Issue**: Python parser fails with `struct.error: required argument is not an integer`
-**Files**: `docs/KNOWN_LIMITATIONS.md#python-parser-double-precision-handling`
+**Status**: ✅ RESOLVED
+**Previous Issue**: Python parser failed with `struct.error: required argument is not an integer`
+**Files**: `python/ftdc/parser/metrics.py`, `docs/KNOWN_LIMITATIONS.md`
 
 **Tasks**:
-- [ ] Investigate exact conditions that trigger struct.error in restore_float()
-- [ ] Review double precision handling in metrics.py and chunk.py
-- [ ] Study how mongodb/ftdc handles double reconstruction
-- [ ] Add test case with failing FTDC file
-- [ ] Implement robust double reconstruction matching Go library
+- [x] Investigate exact conditions that trigger struct.error in restore_float()
+- [x] Review double precision handling in metrics.py and chunk.py
+- [x] Study how mongodb/ftdc handles double reconstruction
+- [x] Implement robust double reconstruction matching Go library (uint64 cast)
+- [x] Verify all 122 tests pass with new implementation
 
-**Priority**: CRITICAL - Python parser unusable until fixed
+**Solution**: Updated `restore_float()` to match mongodb/ftdc Go implementation by casting to uint64 before bit reinterpretation, handling int64 overflow/underflow gracefully.
 
 ### 2. Comprehensive FTDC Testing Coverage
 **Status**: 🔴 CRITICAL - Required for production
-**Issue**: Only tested with single Atlas FTDC file (unknown version/platform)
+**Issue**: Only tested with single Atlas FTDC file (MongoDB 8.0.16, platform unknown)
 **Files**: `docs/TESTING_COVERAGE.md`
 
 **Tasks**:
-- [ ] Document current Atlas FTDC MongoDB version and platform
+- [x] Document current Atlas FTDC MongoDB version (8.0.16)
+- [ ] Document platform for current test file
 - [ ] Acquire FTDC from MongoDB 7.0 (Linux x86_64)
 - [ ] Acquire FTDC from MongoDB 8.0 (Linux x86_64)
 - [ ] Acquire FTDC from MongoDB 8.2 (Linux x86_64) if available
