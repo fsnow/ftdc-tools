@@ -7,10 +7,7 @@ entries in the order they appear.
 
 import io
 import struct
-from datetime import datetime
 from typing import BinaryIO
-
-from bson import Timestamp
 
 from .metrics import BSONType, Metric
 
@@ -262,7 +259,6 @@ def _parse_element(
             raise BSONParseError("Unexpected end of buffer reading Timestamp")
 
         inc, time = struct.unpack('<II', value_bytes)
-        ts = Timestamp(time, inc)
 
         # Timestamp creates TWO metrics:
         # 1. field_name (the time component)

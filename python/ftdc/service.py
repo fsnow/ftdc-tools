@@ -13,7 +13,7 @@ from .errors import (
     JobStatusError,
     ReplicaSetNotFoundError,
 )
-from .models import Clusters, JobId, JobState, JobStatus, LogCollectionJob, Shard
+from .models import JobId, JobState, LogCollectionJob, Shard
 
 
 MONGODB_API_BASE_URL = "https://cloud.mongodb.com/api/atlas/v1.0/groups"
@@ -214,7 +214,7 @@ class FTDCService:
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
 
-        print(f"Download complete!")
+        print("Download complete!")
         return file_path
 
     def get_ftdc_data(

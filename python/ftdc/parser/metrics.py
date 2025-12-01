@@ -8,10 +8,6 @@ import struct
 from datetime import datetime
 from typing import Optional
 
-from bson import decode
-from bson.codec_options import CodecOptions
-from bson.son import SON
-
 from .types import Metric, MetricsExtraction
 
 
