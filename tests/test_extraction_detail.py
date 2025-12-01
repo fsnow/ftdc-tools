@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
-"""Test our extraction vs MongoDB's count in detail."""
+"""Test our extraction vs MongoDB's count in detail.
+
+This is a manual test script, not meant to be run by pytest.
+"""
 
 import io
 import struct
 from pathlib import Path
 
+import pytest
 from bson import decode as bson_decode
 from ftdc.parser.chunk import decompress_chunk, parse_chunk_header
 from ftdc.parser.metrics import metric_for_document
 
 
+@pytest.mark.skip(reason="Manual test script - requires local FTDC files")
 def test_extraction(ftdc_path: Path):
     """Test extraction and show details."""
     with open(ftdc_path, 'rb') as f:

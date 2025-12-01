@@ -1,6 +1,6 @@
 module github.com/fsnow/ftdc-tools/go
 
-go 1.25.4
+go 1.24
 
 require (
 	github.com/mongodb/ftdc v0.0.0-20251021151512-4041a70ba493
