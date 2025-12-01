@@ -57,9 +57,12 @@ bin/
 # Project specific
 *.ftdc
 *.tar.gz
+*.csv
 mongodb-logfiles*/
 debug_*.py
 export_our_metrics.py
+ftdc-run.txt
+docs/ftdc-keys.txt
 
 # CI/CD
 .github/workflows/*.log
